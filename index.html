@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InDex — Index In Depth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --ink:#f3f1ec; --ink-70:rgba(243,241,236,.72); --ink-45:rgba(243,241,236,.46);
+    --paper:#15131f; --paper-soft:#201d30; --line:#332f49;
+    --accent:#d9ae63; --accent-soft:#3a2c16; --accent-ink:#f0d9ac;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --ink:#1b1930; --ink-70:rgba(27,25,48,.68); --ink-45:rgba(27,25,48,.45);
+      --paper:#ffffff; --paper-soft:#f4f2fa; --line:#e3e0ee;
+      --accent:#b8863b; --accent-soft:#f3e7d2; --accent-ink:#5c431c; color-scheme: light;
+    }
+  }
+  :root[data-theme="light"]{
+    --ink:#1b1930; --ink-70:rgba(27,25,48,.68); --ink-45:rgba(27,25,48,.45);
+    --paper:#ffffff; --paper-soft:#f4f2fa; --line:#e3e0ee;
+    --accent:#b8863b; --accent-soft:#f3e7d2; --accent-ink:#5c431c; color-scheme: light;
+  }
+  :root[data-theme="dark"]{
+    --ink:#f3f1ec; --ink-70:rgba(243,241,236,.72); --ink-45:rgba(243,241,236,.46);
+    --paper:#15131f; --paper-soft:#201d30; --line:#332f49;
+    --accent:#d9ae63; --accent-soft:#3a2c16; --accent-ink:#f0d9ac; color-scheme: dark;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *{box-sizing:border-box;}
+  body{margin:0; min-height:100dvh; background:var(--paper-soft);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif; color:var(--ink); display:flex; justify-content:center;}
+  h1,h2,.disp{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;}
+  .app{width:100%; max-width:430px; min-height:100dvh; background:var(--paper); position:relative; overflow-x:hidden;}
+  .screen{display:none; padding:40px 26px 48px; min-height:100dvh; flex-direction:column; position:relative;}
+  .screen.active{display:flex;}
+
+  .lang-row{position:absolute; top:calc(16px + env(safe-area-inset-top,0px)); right:16px; z-index:5;}
+  .lang-btn{appearance:none; border:1.5px solid var(--line); background:var(--paper); color:var(--ink);
+    padding:7px 12px; border-radius:999px; font-size:12.5px; cursor:pointer; font-family:inherit;}
+  .lang-menu{position:absolute; top:40px; right:0; background:var(--paper); border:1.5px solid var(--line);
+    border-radius:14px; padding:6px; display:flex; flex-direction:column; min-width:150px;}
+  .lang-menu button{text-align:left; background:none; border:none; padding:9px 10px; font-size:14px;
+    color:var(--ink); cursor:pointer; border-radius:8px; font-family:inherit;}
+  .lang-menu button:active{background:var(--paper-soft);}
+  .lang-more{font-size:10.5px; color:var(--ink-45); padding:8px 10px 2px;}
+
+  #screen-intro{justify-content:space-between; text-align:center; align-items:center;}
+  .mark{display:flex; align-items:flex-end; justify-content:center; gap:4px; margin-top:14vh;}
+  .wordmark{font-family:"Space Grotesk"; font-weight:700; font-size:15px; letter-spacing:.14em; margin-top:10px;}
+  .headline{font-family:"Space Grotesk"; font-weight:700; font-size:28px; margin:6px 0 14px; line-height:1.15;}
+  .tagline{color:var(--ink-70); font-size:15px; line-height:1.5; max-width:280px;}
+  .btn{appearance:none; border:none; cursor:pointer; width:100%; background:var(--ink); color:var(--paper);
+    font-size:16px; font-weight:600; padding:16px 20px; border-radius:999px; font-family:inherit;}
+  .btn:active{opacity:.85;}
+  .btn.ghost{background:transparent; color:var(--ink); border:1.5px solid var(--line);}
+  .foot-cta{width:100%; margin-top:26px;}
+  .micro{font-size:12.5px; color:var(--ink-45); margin-top:14px;}
+  .link-btn{appearance:none; background:none; border:none; font-size:13px; color:var(--ink-45);
+    text-decoration:underline; cursor:pointer; font-family:inherit; padding:0;}
+
+  #screen-setup{justify-content:flex-start;}
+  .progress-row{display:flex; align-items:center; gap:12px; margin-bottom:34px;}
+  .progress-track{flex:1; height:4px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--ink); width:10%; transition:width .35s ease;}
+  .qcount{font-size:13px; color:var(--ink-45); white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .qtext{font-size:21px; font-weight:600; line-height:1.4; margin:0 0 26px; font-family:"Space Grotesk";}
+  .options, .chips{display:flex; gap:10px;}
+  .options{flex-direction:column;}
+  .chips{flex-wrap:wrap;}
+  .opt{text-align:left; background:var(--paper); border:1.5px solid var(--line); border-radius:16px;
+    padding:16px 18px; font-size:15px; line-height:1.45; color:var(--ink); cursor:pointer; font-family:inherit;}
+  .opt:active{background:var(--paper-soft);}
+  .opt.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .chip{border:1.5px solid var(--line); background:var(--paper); color:var(--ink); padding:9px 14px;
+    border-radius:999px; font-size:13.5px; cursor:pointer; font-family:inherit;}
+  .chip.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .sub-label{font-size:13px; font-weight:600; color:var(--ink-70); margin:4px 0 12px;}
+
+  #screen-results{padding-top:34px; text-align:left;}
+  .dash-eyebrow{font-size:13px; color:var(--ink-45); margin-bottom:4px;}
+  .dash-title{font-size:23px; font-weight:700; margin:0 0 22px; font-family:"Space Grotesk"; line-height:1.3;}
+  .ring-wrap{position:relative; width:150px; height:150px; margin:0 auto 22px;}
+  .ring-label{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring-pct{font-family:"Space Grotesk"; font-weight:700; font-size:32px; line-height:1;}
+  .ring-band{font-size:12px; color:var(--ink-70); margin-top:6px; text-align:center; max-width:110px; line-height:1.35;}
+  .section-label{font-size:13px; font-weight:600; color:var(--ink-70); margin:0 0 14px;}
+  .insight{border-left:3px solid var(--accent); padding:4px 0 4px 16px; margin-bottom:14px;}
+  .insight p{margin:0; font-size:14.5px; line-height:1.55; color:var(--ink);}
+  .tips{list-style:none; padding:0; margin:0 0 30px; display:flex; flex-direction:column; gap:12px;}
+  .tips li{font-size:14.5px; line-height:1.55; color:var(--ink-70); padding-left:18px; position:relative;}
+  .tips li::before{content:""; position:absolute; left:0; top:8px; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+
+  #screen-inventory{padding-top:30px;}
+  .inv-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;}
+  .inv-top{display:flex; align-items:center; gap:12px;}
+  .inv-icon{width:44px; height:44px; border-radius:12px; background:var(--paper-soft); display:flex;
+    align-items:center; justify-content:center; font-size:21px; flex:0 0 auto;}
+  .inv-space-label{font-family:"Space Grotesk"; font-weight:700; font-size:17px; line-height:1.2;}
+  .inv-members-label{font-size:12px; color:var(--ink-45); margin-top:2px;}
+  .inv-actions{display:flex; flex-direction:column; align-items:flex-end; gap:6px;}
+  .tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .tab{appearance:none; border:1.5px solid var(--line); background:var(--paper); color:var(--ink-70);
+    padding:8px 16px; border-radius:999px; font-size:13.5px; cursor:pointer; font-family:inherit;}
+  .tab.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .empty{font-size:14px; color:var(--ink-45); line-height:1.5; padding:16px 2px 26px;}
+  .cat-header{font-size:11.5px; font-weight:700; color:var(--ink-45); text-transform:uppercase;
+    letter-spacing:.06em; margin:16px 2px 6px;}
+  .item-list{display:flex; flex-direction:column; gap:2px; margin-bottom:10px;}
+  .item-card{display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--line);}
+  .item-thumb{width:46px; height:46px; border-radius:12px; background:var(--paper-soft); background-size:cover;
+    background-position:center; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:19px;}
+  .item-info{flex:1; min-width:0;}
+  .item-name{font-size:14.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .item-meta{font-size:12.5px; color:var(--ink-45); margin-top:3px; display:flex; align-items:center; gap:5px; flex-wrap:wrap; row-gap:4px;}
+  .pill{font-size:11px; padding:2px 8px; border-radius:999px; white-space:nowrap;}
+  .pill.shared{background:var(--paper-soft); color:var(--ink-70);}
+  .pill.private{background:var(--accent-soft); color:var(--accent-ink);}
+  .pill.tagchip{background:var(--paper-soft); color:var(--ink-70);}
+  .pill.addtag{background:transparent; border:1px dashed var(--line); color:var(--ink-45); cursor:pointer; font-family:inherit;}
+  .item-del{appearance:none; border:none; background:none; color:var(--ink-45); font-size:20px; cursor:pointer; line-height:1; padding:4px 6px;}
+  .add-form{display:flex; flex-direction:column; gap:10px; margin:6px 0 24px; padding:16px; background:var(--paper-soft); border-radius:18px;}
+  .field{width:100%; border:1.5px solid var(--line); background:var(--paper); color:var(--ink); border-radius:12px;
+    padding:12px 14px; font-size:14.5px; font-family:inherit;}
+  .tag-row{display:flex; gap:8px;}
+  .tag-toggle{flex:1; appearance:none; border:1.5px solid var(--line); background:var(--paper); color:var(--ink-70);
+    padding:10px; border-radius:999px; font-size:13.5px; cursor:pointer; font-family:inherit;}
+  .tag-toggle.on{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .qty-row{display:flex; align-items:center; justify-content:center; gap:16px; padding:4px 0;}
+  .qty-btn{width:34px; height:34px; border-radius:50%; border:1.5px solid var(--line); background:var(--paper);
+    color:var(--ink); font-size:17px; cursor:pointer; font-family:inherit; line-height:1;}
+  .qty-val{font-size:16px; font-weight:600; min-width:28px; text-align:center;}
+  .photo-label{display:block; cursor:pointer;}
+  .photo-preview{height:88px; border-radius:14px; background:var(--paper); border:1.5px dashed var(--line);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-45); font-size:13px;
+    background-size:cover; background-position:center;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="screen active" id="screen-intro">
+    <div class="lang-row">
+      <button class="lang-btn" onclick="toggleLangMenu()">🌐 <span id="langBtnLabel">English</span></button>
+      <div class="lang-menu" id="langMenu" style="display:none;">
+        <button onclick="setLang('en')">English</button>
+        <button onclick="setLang('hi')">हिंदी</button>
+        <button onclick="setLang('bn')">বাংলা</button>
+        <button onclick="setLang('te')">తెలుగు</button>
+        <button onclick="setLang('mr')">मराठी</button>
+        <button onclick="setLang('ta')">தமிழ்</button>
+        <div class="lang-more">15 more languages coming soon</div>
+      </div>
+    </div>
+    <div></div>
+    <div>
+      <div class="mark">
+        <svg width="70" height="70" viewBox="0 0 70 70"><circle cx="13" cy="10" r="9" fill="var(--ink)"/><rect x="4" y="26" width="18" height="40" rx="2" fill="var(--ink)"/><path d="M30 26h14c13 0 22 8 22 20s-9 20-22 20H30V26zm15 32c8 0 13-5 13-12s-5-12-13-12h-5v24h5z" fill="var(--ink)"/></svg>
+      </div>
+      <div class="headline">Index In Depth</div>
+      <div class="tagline" id="taglineText"></div>
+    </div>
+    <div>
+      <button class="btn foot-cta" id="getStartedBtn" onclick="startSetup()"></button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-setup">
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="qcount"><span id="stepNow">1</span> / <span id="stepTotal">4</span></div>
+    </div>
+    <h2 class="qtext" id="stepText"></h2>
+    <div id="stepOptions" class="options"></div>
+    <button class="btn foot-cta" id="multiContinue" style="display:none;"></button>
+  </div>
+
+  <div class="screen" id="screen-results">
+    <div class="dash-eyebrow">Quick check-in</div>
+    <h2 class="dash-title" id="resultAck">Thanks for walking through that.</h2>
+    <div class="ring-wrap" id="resultRingBlock" style="display:none;">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="60" fill="none" stroke="var(--line)" stroke-width="12"/>
+        <circle id="ringFill" cx="75" cy="75" r="60" fill="none" stroke="var(--ink)" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" transform="rotate(-90 75 75)"/>
+      </svg>
+      <div class="ring-label"><div class="ring-pct" id="ringPct">0%</div><div class="ring-band" id="ringBand"></div></div>
+    </div>
+    <div id="resultInsights"></div>
+    <p class="section-label" id="tipsLabelEl"></p>
+    <ul class="tips" id="tipsList"></ul>
+    <button class="btn foot-cta" id="resultCTABtn" onclick="goInventory()"></button>
+  </div>
+
+  <div class="screen" id="screen-inventory">
+    <div class="inv-head">
+      <div class="inv-top">
+        <div class="inv-icon" id="invIcon">🏠</div>
+        <div>
+          <div class="inv-space-label" id="invSpaceLabel">House</div>
+          <div class="inv-members-label" id="invMembersLabel">Members: —</div>
+        </div>
+      </div>
+      <div class="inv-actions">
+        <button class="link-btn" onclick="shareList()">Share</button>
+        <button class="link-btn" id="startOverBtn" onclick="setScreen('screen-intro')"></button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="all" id="tabAllBtn" onclick="setTab('all')"></button>
+      <button class="tab" data-tab="private" id="tabPrivateBtn" onclick="setTab('private')"></button>
+      <button class="tab" data-tab="shared" id="tabSharedBtn" onclick="setTab('shared')"></button>
+    </div>
+
+    <button class="btn ghost foot-cta" id="addItemBtnEl" style="margin-top:0;" onclick="toggleAddForm()"></button>
+
+    <div id="addForm" class="add-form" style="display:none;">
+      <input id="itemName" class="field" type="text" placeholder="What is it?">
+      <input id="itemCategory" class="field" list="categoryList" type="text" placeholder="Category — e.g. Kitchen">
+      <datalist id="categoryList"></datalist>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-val" id="qtyVal">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <div class="tag-row">
+        <button class="tag-toggle on" data-tag="shared" onclick="selectTag(this)">Shared</button>
+        <button class="tag-toggle" data-tag="private" onclick="selectTag(this)">Private</button>
+      </div>
+      <input id="itemTags" class="field" type="text" placeholder="Tags — e.g. festival, fragile, borrowed">
+      <input id="itemDate" class="field" type="date">
+      <label class="photo-label" for="photoInput">
+        <div class="photo-preview" id="photoPreview">Add a photo</div>
+      </label>
+      <input id="photoInput" type="file" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
+      <button class="btn" id="saveItemBtnEl" onclick="saveItem()"></button>
+    </div>
+
+    <div id="emptyState" class="empty">Nothing added yet. Start with whatever's nearest you right now.</div>
+    <div id="itemList" class="item-list"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- i18n ---------- */
+const LANG_NAMES = {en:"English", hi:"हिंदी", bn:"বাংলা", te:"తెలుగు", mr:"मराठी", ta:"தமிழ்"};
+const LANG = {
+en:{tagline:"A few questions about how you keep things, then a place to track them — private and shared.",
+  getStarted:"Get Started", continueBtn:"Continue", addBtn:"Add",
+  organizeQ:"How do you currently sort what you own in this space?",
+  organizeOpt1:"Room-wise", organizeOpt2:"By who uses it", organizeOpt3:"By category — like Kitchen, Tools",
+  organizeOpt4:"By how often it's used", organizeOpt5:"Whatever seems accessible",
+  livingQ:"What kind of space are you categorising?", livingOpt1:"House", livingOpt2:"Hostel",
+  livingOpt3:"Shared Flat / PG", livingOpt4:"Company / Others",
+  peopleQ:"How many people share this space day to day?",
+  peopleOpt1:"Just me", peopleOpt2:"2–3", peopleOpt3:"4–5", peopleOpt4:"6 or more",
+  membersQ:"Add their names (optional)",
+  helpQ:"Does anyone from outside help run this space? (Cleaning, cook, domestic help)",
+  helpYes:"Yes", helpNo:"No", resultCTA:"Set up your inventory", tipsLabel:"A few ways to start",
+  tabAll:"All", tabPrivate:"Private", tabShared:"Shared",
+  addItemBtn:"+ Add an item", saveItemBtn:"Save item", startOver:"Start over"},
+hi:{tagline:"अपनी चीज़ों को रखने के तरीके पर कुछ सवाल, फिर उन्हें ट्रैक करने की जगह — निजी और साझा।",
+  getStarted:"शुरू करें", continueBtn:"आगे बढ़ें", addBtn:"जोड़ें",
+  organizeQ:"आप इस जगह में अपना सामान अभी कैसे व्यवस्थित करते हैं?",
+  organizeOpt1:"कमरे के हिसाब से", organizeOpt2:"इस्तेमाल करने वाले के हिसाब से", organizeOpt3:"श्रेणी के हिसाब से",
+  organizeOpt4:"इस्तेमाल की आवृत्ति के हिसाब से", organizeOpt5:"जो भी आसानी से हाथ लगे",
+  livingQ:"यह किस तरह की जगह है?", livingOpt1:"घर", livingOpt2:"हॉस्टल",
+  livingOpt3:"शेयर्ड फ्लैट / पीजी", livingOpt4:"कंपनी / अन्य",
+  peopleQ:"इस जगह को रोज़ कितने लोग साझा करते हैं?",
+  peopleOpt1:"सिर्फ़ मैं", peopleOpt2:"2–3", peopleOpt3:"4–5", peopleOpt4:"6 या अधिक",
+  membersQ:"उनके नाम जोड़ें (वैकल्पिक)",
+  helpQ:"क्या कोई बाहर से इस जगह को चलाने में मदद करता है? (सफ़ाई, रसोइया, घरेलू सहायक)",
+  helpYes:"हां", helpNo:"नहीं", resultCTA:"अपनी सूची बनाना शुरू करें", tipsLabel:"शुरुआत करने के कुछ तरीके",
+  tabAll:"सभी", tabPrivate:"निजी", tabShared:"साझा",
+  addItemBtn:"+ वस्तु जोड़ें", saveItemBtn:"वस्तु सहेजें", startOver:"फिर से शुरू करें"},
+bn:{tagline:"আপনি জিনিসপত্র কীভাবে রাখেন তা নিয়ে কয়েকটি প্রশ্ন, তারপর সেগুলো ট্র্যাক রাখার জায়গা — ব্যক্তিগত ও ভাগ করা।",
+  getStarted:"শুরু করুন", continueBtn:"এগিয়ে যান", addBtn:"যোগ করুন",
+  organizeQ:"এই জায়গায় আপনি এখন আপনার জিনিসপত্র কীভাবে সাজান?",
+  organizeOpt1:"ঘর অনুযায়ী", organizeOpt2:"কে ব্যবহার করে তার অনুযায়ী", organizeOpt3:"বিভাগ অনুযায়ী",
+  organizeOpt4:"কত ঘন ঘন ব্যবহার হয় তার অনুযায়ী", organizeOpt5:"যেটা হাতের কাছে থাকে",
+  livingQ:"এটা কেমন জায়গা?", livingOpt1:"বাড়ি", livingOpt2:"হোস্টেল",
+  livingOpt3:"শেয়ার করা ফ্ল্যাট / পিজি", livingOpt4:"কোম্পানি / অন্যান্য",
+  peopleQ:"এই জায়গা প্রতিদিন কতজন ভাগ করে নেয়?",
+  peopleOpt1:"শুধু আমি", peopleOpt2:"２–৩", peopleOpt3:"৪–৫", peopleOpt4:"৬ বা তার বেশি",
+  membersQ:"তাদের নাম যোগ করুন (ঐচ্ছিক)",
+  helpQ:"এই জায়গা চালাতে বাইরে থেকে কেউ কি সাহায্য করে? (পরিষ্কার, রাঁধুনি, গৃহসহায়ক)",
+  helpYes:"হ্যাঁ", helpNo:"না", resultCTA:"আপনার তালিকা তৈরি করুন", tipsLabel:"শুরু করার কয়েকটি উপায়",
+  tabAll:"সব", tabPrivate:"ব্যক্তিগত", tabShared:"ভাগ করা",
+  addItemBtn:"+ জিনিস যোগ করুন", saveItemBtn:"জিনিস সংরক্ষণ করুন", startOver:"আবার শুরু করুন"},
+te:{tagline:"మీరు మీ వస్తువులను ఎలా ఉంచుకుంటారో కొన్ని ప్రశ్నలు, తర్వాత వాటిని ట్రాక్ చేయడానికి ఒక చోటు — వ్యక్తిగతం మరియు పంచుకున్నది.",
+  getStarted:"ప్రారంభించండి", continueBtn:"కొనసాగించండి", addBtn:"జోడించండి",
+  organizeQ:"ఈ స్థలంలో మీరు ప్రస్తుతం మీ వస్తువులను ఎలా సర్దుతారు?",
+  organizeOpt1:"గది ప్రకారం", organizeOpt2:"ఎవరు వాడతారో దాని ప్రకారం", organizeOpt3:"వర్గం ప్రకారం",
+  organizeOpt4:"ఎంత తరచుగా వాడతారో దాని ప్రకారం", organizeOpt5:"ఏది అందుబాటులో ఉంటే అది",
+  livingQ:"ఇది ఎలాంటి స్థలం?", livingOpt1:"ఇల్లు", livingOpt2:"హాస్టల్",
+  livingOpt3:"షేర్డ్ ఫ్లాట్ / పీజీ", livingOpt4:"కంపెనీ / ఇతరం",
+  peopleQ:"ఈ స్థలాన్ని ప్రతిరోజూ ఎంతమంది పంచుకుంటారు?",
+  peopleOpt1:"నేను మాత్రమే", peopleOpt2:"2–3", peopleOpt3:"4–5", peopleOpt4:"6 లేదా అంతకంటే ఎక్కువ",
+  membersQ:"వారి పేర్లు జోడించండి (ఐచ్ఛికం)",
+  helpQ:"ఈ స్థలాన్ని నడపడానికి బయటి నుండి ఎవరైనా సహాయం చేస్తారా? (శుభ్రం, వంట, ఇంటి సహాయకుడు)",
+  helpYes:"అవును", helpNo:"లేదు", resultCTA:"మీ జాబితాను సెటప్ చేయండి", tipsLabel:"ప్రారంభించడానికి కొన్ని మార్గాలు",
+  tabAll:"అన్నీ", tabPrivate:"వ్యక్తిగతం", tabShared:"పంచుకున్నది",
+  addItemBtn:"+ వస్తువు జోడించండి", saveItemBtn:"వస్తువును సేవ్ చేయండి", startOver:"మళ్ళీ ప్రారంభించండి"},
+mr:{tagline:"तुम्ही तुमच्या वस्तू कशा ठेवता याबद्दल काही प्रश्न, आणि मग त्या नोंदवण्यासाठी एक जागा — खासगी आणि सामायिक.",
+  getStarted:"सुरू करा", continueBtn:"पुढे जा", addBtn:"जोडा",
+  organizeQ:"या जागेत तुम्ही सध्या तुमचे सामान कसे मांडता?",
+  organizeOpt1:"खोलीनुसार", organizeOpt2:"कोण वापरतं त्यानुसार", organizeOpt3:"प्रकारानुसार",
+  organizeOpt4:"किती वेळा वापरलं जातं त्यानुसार", organizeOpt5:"जे सहज हाताशी असेल ते",
+  livingQ:"ही कोणत्या प्रकारची जागा आहे?", livingOpt1:"घर", livingOpt2:"वसतिगृह",
+  livingOpt3:"शेअर्ड फ्लॅट / पीजी", livingOpt4:"कंपनी / इतर",
+  peopleQ:"ही जागा रोज किती लोक वापरतात?",
+  peopleOpt1:"फक्त मी", peopleOpt2:"2–3", peopleOpt3:"4–5", peopleOpt4:"6 किंवा अधिक",
+  membersQ:"त्यांची नावं जोडा (ऐच्छिक)",
+  helpQ:"ही जागा चालवायला बाहेरून कोणी मदत करतं का? (साफसफाई, स्वयंपाक, घरगुती मदत)",
+  helpYes:"होय", helpNo:"नाही", resultCTA:"तुमची यादी तयार करा", tipsLabel:"सुरुवात करण्याचे काही मार्ग",
+  tabAll:"सर्व", tabPrivate:"खासगी", tabShared:"सामायिक",
+  addItemBtn:"+ वस्तू जोडा", saveItemBtn:"वस्तू जतन करा", startOver:"पुन्हा सुरू करा"},
+ta:{tagline:"நீங்கள் உங்கள் பொருட்களை எப்படி வைத்திருக்கிறீர்கள் என்பது பற்றிய சில கேள்விகள், பின்னர் அவற்றை கண்காணிக்க ஒரு இடம் — தனிப்பட்டது மற்றும் பகிரப்பட்டது.",
+  getStarted:"தொடங்குங்கள்", continueBtn:"தொடரவும்", addBtn:"சேர்க்கவும்",
+  organizeQ:"இந்த இடத்தில் நீங்கள் தற்போது உங்கள் பொருட்களை எப்படி ஒழுங்கமைக்கிறீர்கள்?",
+  organizeOpt1:"அறையின் படி", organizeOpt2:"யார் பயன்படுத்துகிறார்கள் என்பதன் படி", organizeOpt3:"வகையின் படி",
+  organizeOpt4:"எவ்வளவு அடிக்கடி பயன்படுத்தப்படுகிறது என்பதன் படி", organizeOpt5:"எது கைக்கு எட்டுகிறதோ அது",
+  livingQ:"இது என்ன வகையான இடம்?", livingOpt1:"வீடு", livingOpt2:"விடுதி",
+  livingOpt3:"பகிர்ந்த குடியிருப்பு / பிஜி", livingOpt4:"நிறுவனம் / மற்றவை",
+  peopleQ:"இந்த இடத்தை தினமும் எத்தனை பேர் பகிர்கிறார்கள்?",
+  peopleOpt1:"நான் மட்டும்", peopleOpt2:"2–3", peopleOpt3:"4–5", peopleOpt4:"6 அல்லது அதற்கு மேல்",
+  membersQ:"அவர்களின் பெயர்களைச் சேர்க்கவும் (விருப்பத்தேர்வு)",
+  helpQ:"இந்த இடத்தை நடத்த வெளியிலிருந்து யாராவது உதவுகிறார்களா? (சுத்தம், சமையல், வீட்டு உதவி)",
+  helpYes:"ஆம்", helpNo:"இல்லை", resultCTA:"உங்கள் பட்டியலை அமைக்கவும்", tipsLabel:"தொடங்குவதற்கான சில வழிகள்",
+  tabAll:"அனைத்தும்", tabPrivate:"தனிப்பட்டது", tabShared:"பகிரப்பட்டது",
+  addItemBtn:"+ பொருள் சேர்க்கவும்", saveItemBtn:"பொருளை சேமிக்கவும்", startOver:"மீண்டும் தொடங்கவும்"}
+};
+let currentLang = "en";
+try{ const saved = localStorage.getItem("indexLang"); if(saved && LANG[saved]) currentLang = saved; }catch(e){}
+function t(key){ return (LANG[currentLang] && LANG[currentLang][key]) || LANG.en[key] || key; }
+function toggleLangMenu(){ const m=document.getElementById("langMenu"); m.style.display = m.style.display==="block"?"none":"block"; }
+function setLang(code){
+  currentLang = code;
+  try{ localStorage.setItem("indexLang", code); }catch(e){}
+  document.getElementById("langBtnLabel").textContent = LANG_NAMES[code];
+  document.getElementById("langMenu").style.display = "none";
+  applyStaticLang();
+  if(document.getElementById("screen-setup").classList.contains("active")) renderStep();
+}
+function applyStaticLang(){
+  document.getElementById("taglineText").textContent = t("tagline");
+  document.getElementById("getStartedBtn").textContent = t("getStarted");
+  document.getElementById("resultCTABtn").textContent = t("resultCTA");
+  document.getElementById("tipsLabelEl").textContent = t("tipsLabel");
+  document.getElementById("startOverBtn").textContent = t("startOver");
+  document.getElementById("tabAllBtn").textContent = t("tabAll");
+  document.getElementById("tabPrivateBtn").textContent = t("tabPrivate");
+  document.getElementById("tabSharedBtn").textContent = t("tabShared");
+  document.getElementById("addItemBtnEl").textContent = t("addItemBtn");
+  document.getElementById("saveItemBtnEl").textContent = t("saveItemBtn");
+  renderItems();
+}
+
+/* ---------- setup flow ---------- */
+const LIVING_ICON = {livingOpt1:"🏠", livingOpt2:"🏨", livingOpt3:"🏘️", livingOpt4:"🏢"};
+const BASE_STEPS = [
+  {id:"living", kind:"choice", qKey:"livingQ", optKeys:["livingOpt1","livingOpt2","livingOpt3","livingOpt4"]},
+  {id:"peoplemembers", kind:"peoplemembers", qKey:"peopleQ"},
+  {id:"organize", kind:"multi", qKey:"organizeQ", optKeys:["organizeOpt1","organizeOpt2","organizeOpt3","organizeOpt4","organizeOpt5"]},
+  {id:"help", kind:"choice", qKey:"helpQ", optKeys:["helpYes","helpNo"]}
+];
+const HELP_QUESTIONS = [
+  {id:"crockery", kind:"scored", q:"Do they eat or drink from the same cups and plates as everyone else here?",
+   opts:[["Yes, exactly the same",0],["Mostly — a couple of items are set aside",1],["No, they have a separate set",2]],
+   insight:"A separate cup or plate is easy to miss day to day — until it's the only thing that's separate."},
+  {id:"shelf", kind:"scored", q:"Where is their utensils or crockery placed?",
+   opts:[["Mixed in with everyone else's",0],["Same shelf, separate section",1],["A different shelf or cupboard entirely",2]],
+   insight:"A separate shelf rarely gets a second thought. Until someone points it out."},
+  {id:"table", kind:"scored", q:"Where do they usually eat their meals?",
+   opts:[["At the same table, same time",0],["Same room, seated separately",1],["Apart from everyone else, elsewhere",2],
+         ["They aren't provided a seating space",3],["They aren't provided any meals",4]],
+   insight:"Where — and whether — someone eats says a lot about whether they're seen as part of the place."},
+  {id:"offlimits", kind:"scored", q:"Are there any items that are off-limits to them? (Remote, A/C, good towels)",
+   opts:[["No, they use what everyone uses",0],["A few things are off-limits",1],["Yes, quite a few things",2]],
+   insight:"Short lists like this are common. Worth knowing what's on it, and why."},
+  {id:"gifts", kind:"scored", q:"During festivals or special occasions, are they given any bonus?",
+   opts:[["Yes — often a meaningful one",0],["Something's given, but more modest",1],["Compensated with old, used items instead",2]],
+   insight:"There's a difference between being thanked and being handed what's left over."},
+  {id:"name", kind:"scored", q:"How do you refer to them?",
+   opts:[["By their name, like everyone else",0],["By a kinship label — didi, bhaiya",1],
+         ["Depends on the environment or their behaviour",2],["By their role or position",3]],
+   insight:"Names, roles and kinship terms each say something a little different about how someone's seen here."}
+];
+const HELP_MAX = HELP_QUESTIONS.reduce((a,q)=>a+(q.opts.length-1),0);
+
+let steps = BASE_STEPS.slice();
+let stepPtr = 0;
+let answers = {};
+let shareScores = [];
+let flaggedInsights = [];
+let selectedChips = new Set();
+let household = {living:null, members:[]};
+try{ const h = JSON.parse(localStorage.getItem("indexHousehold")||"null"); if(h) household = h; }catch(e){}
+
+function setScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function startSetup(){
+  steps = BASE_STEPS.slice(); stepPtr = 0; answers = {}; shareScores = []; flaggedInsights = [];
+  household = {living:null, members:[]};
+  setScreen("screen-setup");
+  renderStep();
+}
+function renderMemberChips(){
+  const c = document.getElementById("memberChips");
+  if(!c) return;
+  c.innerHTML = "";
+  household.members.forEach((name,i)=>{
+    const chip = document.createElement("span");
+    chip.className = "chip on"; chip.style.cursor = "pointer";
+    chip.textContent = name + " ×";
+    chip.onclick = ()=>{ household.members.splice(i,1); renderMemberChips(); };
+    c.appendChild(chip);
+  });
+}
+function renderStep(){
+  if(stepPtr >= steps.length){ showResults(); return; }
+  const s = steps[stepPtr];
+  document.getElementById("stepNow").textContent = stepPtr+1;
+  document.getElementById("stepTotal").textContent = steps.length;
+  document.getElementById("progressFill").style.width = ((stepPtr+1)/steps.length*100)+"%";
+  document.getElementById("stepText").textContent = s.q || t(s.qKey);
+  const wrap = document.getElementById("stepOptions");
+  wrap.innerHTML = "";
+  const contBtn = document.getElementById("multiContinue");
+  contBtn.style.display = "none";
+
+  if(s.kind === "multi"){
+    wrap.className = "chips";
+    selectedChips = new Set();
+    s.optKeys.forEach(key=>{
+      const b = document.createElement("button");
+      b.className = "chip"; b.textContent = t(key);
+      b.onclick = ()=>{
+        b.classList.toggle("on");
+        if(selectedChips.has(key)) selectedChips.delete(key); else selectedChips.add(key);
+        contBtn.style.display = selectedChips.size ? "block" : "none";
+      };
+      wrap.appendChild(b);
+    });
+    contBtn.textContent = t("continueBtn");
+    contBtn.onclick = ()=>{ answers[s.id] = [...selectedChips]; stepPtr++; renderStep(); };
+  } else if(s.kind === "peoplemembers"){
+    wrap.className = "options";
+    const rangeWrap = document.createElement("div");
+    rangeWrap.className = "options"; rangeWrap.style.marginBottom = "20px";
+    ["peopleOpt1","peopleOpt2","peopleOpt3","peopleOpt4"].forEach(key=>{
+      const b = document.createElement("button");
+      b.className = "opt" + (answers.people===key ? " on" : ""); b.textContent = t(key);
+      b.onclick = ()=>{
+        answers.people = key;
+        rangeWrap.querySelectorAll(".opt").forEach(x=>x.classList.remove("on"));
+        b.classList.add("on");
+        contBtn.style.display = "block";
+      };
+      rangeWrap.appendChild(b);
+    });
+    wrap.appendChild(rangeWrap);
+    const sub = document.createElement("div"); sub.className = "sub-label"; sub.textContent = t("membersQ");
+    wrap.appendChild(sub);
+    const chipsDiv = document.createElement("div"); chipsDiv.className = "chips"; chipsDiv.id = "memberChips";
+    wrap.appendChild(chipsDiv);
+    const addRow = document.createElement("div");
+    addRow.style.cssText = "display:flex; gap:8px; margin-top:10px;";
+    addRow.innerHTML = '<input id="memberInput" class="field" type="text" placeholder="Add a name">'+
+      '<button class="btn ghost" id="memberAddBtn" style="width:auto; padding:12px 18px;">'+t("addBtn")+'</button>';
+    wrap.appendChild(addRow);
+    renderMemberChips();
+    document.getElementById("memberAddBtn").onclick = ()=>{
+      const inp = document.getElementById("memberInput"); const val = inp.value.trim();
+      if(val){ household.members.push(val); inp.value=""; renderMemberChips(); }
+    };
+    contBtn.textContent = t("continueBtn");
+    contBtn.style.display = answers.people ? "block" : "none";
+    contBtn.onclick = ()=>{ if(!answers.people) return; stepPtr++; renderStep(); };
+  } else if(s.kind === "choice"){
+    wrap.className = "options";
+    s.optKeys.forEach(key=>{
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = t(key);
+      b.onclick = ()=>{
+        answers[s.id] = key;
+        if(s.id === "living") household.living = key;
+        if(s.id === "help" && key === "helpYes"){ steps.splice(stepPtr+1, 0, ...HELP_QUESTIONS); }
+        stepPtr++; renderStep();
+      };
+      wrap.appendChild(b);
+    });
+  } else if(s.kind === "scored"){
+    wrap.className = "options";
+    s.opts.forEach(([label,score])=>{
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = label;
+      b.onclick = ()=>{
+        shareScores.push(score);
+        if(score >= 2) flaggedInsights.push(s.insight);
+        stepPtr++; renderStep();
+      };
+      wrap.appendChild(b);
+    });
+  }
+}
+
+function showResults(){
+  setScreen("screen-results");
+  try{ localStorage.setItem("indexHousehold", JSON.stringify(household)); }catch(e){}
+  const hadHelp = answers.help === "helpYes";
+  const ringBlock = document.getElementById("resultRingBlock");
+  const insightWrap = document.getElementById("resultInsights");
+  insightWrap.innerHTML = "";
+  if(hadHelp && shareScores.length){
+    ringBlock.style.display = "block";
+    const total = shareScores.reduce((a,b)=>a+b,0);
+    const pct = Math.round(total/HELP_MAX*100);
+    const circumference = 377;
+    const offset = circumference - (circumference*pct/100);
+    const ring = document.getElementById("ringFill");
+    ring.style.transition = "stroke-dashoffset 1s ease";
+    requestAnimationFrame(()=>{ ring.style.strokeDashoffset = offset; });
+    document.getElementById("ringPct").textContent = pct+"%";
+    let band;
+    if(pct <= 25) band = "Mostly shared — genuinely one space";
+    else if(pct <= 55) band = "A few quiet, consistent lines";
+    else if(pct <= 80) band = "Two routines under one roof";
+    else band = "Barely overlapping lives";
+    document.getElementById("ringBand").textContent = band;
+    document.getElementById("resultAck").textContent = flaggedInsights.length
+      ? "A couple of things stood out — just to notice, not to judge."
+      : "Nothing here pointed to a hard split — that's genuinely uncommon.";
+    flaggedInsights.slice(0,3).forEach(text=>{
+      const d = document.createElement("div"); d.className = "insight"; d.innerHTML = "<p>"+text+"</p>";
+      insightWrap.appendChild(d);
+    });
+  } else {
+    ringBlock.style.display = "none";
+    document.getElementById("resultAck").textContent = "Thanks for walking through that — here's where to start.";
+  }
+  const tipsWrap = document.getElementById("tipsList");
+  tipsWrap.innerHTML = "";
+  buildTips(hadHelp).forEach(tip=>{ const li=document.createElement("li"); li.textContent=tip; tipsWrap.appendChild(li); });
+  applyStaticLang();
+}
+function buildTips(hadHelp){
+  const tips = [];
+  const organize = answers.organize || [];
+  if(organize.includes("organizeOpt5")){
+    tips.push("Start small — pick one category, like tools or cleaning supplies, and give it a single home this week.");
+  } else {
+    tips.push("You've already got a system. InDex just adds one more axis to it: private or shared.");
+  }
+  tips.push("Photograph items as you add them — it's the fastest way to actually notice what you own.");
+  tips.push("Give every category one shared home, not a separate version for separate people.");
+  if(hadHelp && flaggedInsights.length){
+    tips.push("Next time something needs replacing, consider replacing both sets at once — not just one.");
+  }
+  return tips;
+}
+
+/* ---------- inventory ---------- */
+const DEFAULT_CATEGORIES = ["Kitchen","Cleaning","Tools","Electronics","Furniture","Personal","Other"];
+const CAT_ICONS = {Kitchen:"🍽️", Cleaning:"🧹", Tools:"🔧", Electronics:"🔌", Furniture:"🛋️", Personal:"🧴", Other:"📦"};
+function catIcon(cat){ return CAT_ICONS[cat] || "📦"; }
+function allCategories(){ const set=new Set(DEFAULT_CATEGORIES); items.forEach(it=>set.add(it.category)); return [...set]; }
+function refreshCategoryList(){
+  document.getElementById("categoryList").innerHTML = allCategories().map(c=>'<option value="'+escapeHtml(c)+'">').join("");
+}
+
+let items = [];
+try{ items = JSON.parse(localStorage.getItem("indexItems") || "[]"); }catch(e){ items = []; }
+let activeTab = "all";
+let pendingPhoto = null;
+let currentQty = 1;
+
+function goInventory(){
+  setScreen("screen-inventory");
+  document.getElementById("invIcon").textContent = LIVING_ICON[household.living] || "🏠";
+  document.getElementById("invSpaceLabel").textContent = household.living ? t(household.living) : t("livingOpt1");
+  const count = household.members.length ? household.members.length : (answers.people ? t(answers.people) : "—");
+  document.getElementById("invMembersLabel").textContent = "Members: " + count;
+  refreshCategoryList();
+  renderItems();
+}
+function setTab(tab){
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
+  renderItems();
+}
+function escapeHtml(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+
+function renderItems(){
+  const list = document.getElementById("itemList");
+  if(!list) return;
+  list.innerHTML = "";
+  const filtered = items.filter(it => activeTab === "all" || it.tag === activeTab);
+  document.getElementById("emptyState").style.display = filtered.length ? "none" : "block";
+  const ordered = filtered.slice().reverse();
+  const groups = {}; const order = [];
+  ordered.forEach(it=>{ if(!groups[it.category]){ groups[it.category]=[]; order.push(it.category); } groups[it.category].push(it); });
+  order.forEach(cat=>{
+    const header = document.createElement("div"); header.className = "cat-header"; header.textContent = cat;
+    list.appendChild(header);
+    groups[cat].forEach(it=>{
+      const card = document.createElement("div"); card.className = "item-card";
+      const thumbStyle = it.photo ? ' style="background-image:url('+it.photo+')"' : "";
+      const tagLabel = t(it.tag === "private" ? "tabPrivate" : "tabShared");
+      let dateText = "";
+      if(it.date){ try{ dateText = new Date(it.date+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"}); }catch(e){} }
+      const metaBits = [];
+      if(it.qty > 1) metaBits.push("×"+it.qty);
+      if(dateText) metaBits.push(dateText);
+      const metaText = metaBits.join(" · ");
+      const tagChips = (it.tags||[]).map(tg=>'<span class="pill tagchip">'+escapeHtml(tg)+'</span>').join("");
+      card.innerHTML =
+        '<div class="item-thumb"'+thumbStyle+'>'+(it.photo ? "" : catIcon(it.category))+'</div>'+
+        '<div class="item-info"><div class="item-name">'+escapeHtml(it.name)+'</div>'+
+        '<div class="item-meta">'+(metaText ? escapeHtml(metaText)+" " : "")+'<span class="pill '+it.tag+'">'+tagLabel+'</span>'+
+        tagChips+'<button class="pill addtag" data-id="'+it.id+'">+ tag</button></div></div>'+
+        '<button class="item-del" aria-label="Delete">×</button>';
+      card.querySelector(".item-del").onclick = ()=>deleteItem(it.id);
+      card.querySelector(".addtag").onclick = ()=>promptAddTag(it.id);
+      list.appendChild(card);
+    });
+  });
+}
+function promptAddTag(id){
+  const val = prompt("Add a tag");
+  if(val && val.trim()){
+    const item = items.find(i=>i.id===id);
+    if(item){ item.tags = item.tags || []; item.tags.push(val.trim()); saveItems(); renderItems(); }
+  }
+}
+function deleteItem(id){ items = items.filter(it=>it.id !== id); saveItems(); renderItems(); }
+function saveItems(){ try{ localStorage.setItem("indexItems", JSON.stringify(items)); }catch(e){} }
+function toggleAddForm(){
+  const f = document.getElementById("addForm");
+  const opening = f.style.display !== "block";
+  f.style.display = opening ? "block" : "none";
+  if(opening) refreshCategoryList();
+}
+function selectTag(btn){ document.querySelectorAll(".tag-toggle").forEach(b=>b.classList.remove("on")); btn.classList.add("on"); }
+function changeQty(delta){ currentQty = Math.max(1, currentQty+delta); document.getElementById("qtyVal").textContent = currentQty; }
+
+function handlePhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 240;
+      const scale = Math.min(1, maxW/img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width*scale; canvas.height = img.height*scale;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingPhoto = canvas.toDataURL("image/jpeg", 0.6);
+      const prev = document.getElementById("photoPreview");
+      prev.style.backgroundImage = "url("+pendingPhoto+")"; prev.textContent = "";
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveItem(){
+  const name = document.getElementById("itemName").value.trim();
+  if(!name) return;
+  const category = document.getElementById("itemCategory").value.trim() || "Other";
+  const tagBtn = document.querySelector(".tag-toggle.on");
+  const tag = tagBtn ? tagBtn.dataset.tag : "shared";
+  const tagsRaw = document.getElementById("itemTags").value.trim();
+  const tags = tagsRaw ? tagsRaw.split(",").map(x=>x.trim()).filter(Boolean) : [];
+  const date = document.getElementById("itemDate").value || null;
+  items.push({id: Date.now().toString(36), name, category, tag, tags, qty: currentQty, date, photo: pendingPhoto});
+  saveItems();
+  document.getElementById("itemName").value = "";
+  document.getElementById("itemTags").value = "";
+  document.getElementById("itemDate").value = "";
+  document.getElementById("itemCategory").value = "";
+  pendingPhoto = null; currentQty = 1;
+  document.getElementById("qtyVal").textContent = "1";
+  const prev = document.getElementById("photoPreview");
+  prev.style.backgroundImage = ""; prev.textContent = "Add a photo";
+  document.querySelectorAll(".tag-toggle").forEach(b=>b.classList.remove("on"));
+  document.querySelector('.tag-toggle[data-tag="shared"]').classList.add("on");
+  toggleAddForm();
+  renderItems();
+}
+function shareList(){
+  const lines = items.map(it => "• "+it.name+(it.qty>1 ? " x"+it.qty : "")+" — "+it.category+" ("+it.tag+")");
+  const heading = (household.living ? t(household.living)+" — " : "") + "InDex list";
+  const text = heading + "\n" + lines.join("\n");
+  if(navigator.share){ navigator.share({title:"InDex list", text:text}).catch(()=>{}); }
+  else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      const btns = document.querySelectorAll(".inv-actions .link-btn");
+      const btn = btns[0]; const old = btn.textContent;
+      btn.textContent = "Copied!"; setTimeout(()=>{ btn.textContent = old; }, 1500);
+    }).catch(()=>{});
+  }
+}
+
+/* ---------- init ---------- */
+document.getElementById("langBtnLabel").textContent = LANG_NAMES[currentLang];
+applyStaticLang();
+</script>
+</body>
+</html>
